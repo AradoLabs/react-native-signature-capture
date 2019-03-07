@@ -3,7 +3,7 @@
 #import "RSSignatureViewManager.h"
 
 #define             STROKE_WIDTH_MIN 0.004 // Stroke width determined by touch velocity
-#define             STROKE_WIDTH_MAX 0.030
+#define             STROKE_WIDTH_MAX 0.015
 #define       STROKE_WIDTH_SMOOTHING 0.5   // Low pass filter alpha
 
 #define           VELOCITY_CLAMP_MIN 20
@@ -14,7 +14,7 @@
 #define             MAXIMUM_VERTECES 100000
 
 
-static GLKVector3 StrokeColor = { 0, 0, 0 };
+static GLKVector3 StrokeColor = { 0, 0, 0.7 };
 static float clearColor[4] = { 1, 1, 1, 0 };
 
 // Vertex structure containing 3D point and color
@@ -124,7 +124,7 @@ static PPSSignaturePoint ViewPointToGL(CGPoint viewPoint, CGRect bounds, GLKVect
 		
 		time(NULL);
 		
-		self.backgroundColor = [UIColor whiteColor];
+        self.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.0];
 		self.opaque = NO;
 		
 		self.context = context;
@@ -340,7 +340,7 @@ static PPSSignaturePoint ViewPointToGL(CGPoint viewPoint, CGRect bounds, GLKVect
 	if (t.state == UIGestureRecognizerStateRecognized) {
 		glBindBuffer(GL_ARRAY_BUFFER, dotsBuffer);
 		
-		PPSSignaturePoint touchPoint = ViewPointToGL(l, self.bounds, (GLKVector3){1, 1, 1});
+		PPSSignaturePoint touchPoint = ViewPointToGL(l, self.bounds, StrokeColor);
 		addVertex(&dotsLength, touchPoint);
 		
 		PPSSignaturePoint centerPoint = touchPoint;
@@ -387,7 +387,7 @@ static PPSSignaturePoint ViewPointToGL(CGPoint viewPoint, CGRect bounds, GLKVect
 	CGPoint v = [p velocityInView:self];
 	CGPoint l = [p locationInView:self];
 	
-	currentVelocity = ViewPointToGL(v, self.bounds, (GLKVector3){0,0,0});
+	currentVelocity = ViewPointToGL(v, self.bounds, StrokeColor);
 	float distance = 0.;
 	if (previousPoint.x > 0) {
 		distance = sqrtf((l.x - previousPoint.x) * (l.x - previousPoint.x) + (l.y - previousPoint.y) * (l.y - previousPoint.y));
@@ -406,7 +406,7 @@ static PPSSignaturePoint ViewPointToGL(CGPoint viewPoint, CGRect bounds, GLKVect
 		previousPoint = l;
 		previousMidPoint = l;
 		
-		PPSSignaturePoint startPoint = ViewPointToGL(l, self.bounds, (GLKVector3){1, 1, 1});
+		PPSSignaturePoint startPoint = ViewPointToGL(l, self.bounds, (GLKVector3){0, 0, 1});
 		previousVertex = startPoint;
 		previousThickness = penThickness;
 		
@@ -455,7 +455,7 @@ static PPSSignaturePoint ViewPointToGL(CGPoint viewPoint, CGRect bounds, GLKVect
 		
 	} else if (p.state == UIGestureRecognizerStateEnded | p.state == UIGestureRecognizerStateCancelled) {
 		
-		PPSSignaturePoint v = ViewPointToGL(l, self.bounds, (GLKVector3){1, 1, 1});
+		PPSSignaturePoint v = ViewPointToGL(l, self.bounds, (GLKVector3){0, 0, 1});
 		addVertex(&length, v);
 		
 		previousVertex = v;
@@ -480,7 +480,7 @@ static PPSSignaturePoint ViewPointToGL(CGPoint viewPoint, CGRect bounds, GLKVect
 		effect.constantColor = GLKVector4Make(red, green, blue, alpha);
 	} else if (effect && self.strokeColor && [self.strokeColor getWhite:&white alpha:&alpha]) {
 		effect.constantColor = GLKVector4Make(white, white, white, alpha);
-	} else effect.constantColor = GLKVector4Make(0,0,0,1);
+	} else effect.constantColor = GLKVector4Make(0, 0, 0.7, 1);
 }
 
 
